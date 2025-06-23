@@ -8,34 +8,27 @@ BTC_VERSION_FILE="${BTC_DIR}/.btc_version"
 
 mkdir -p "$BTC_BIN"
 mkdir -p "$(dirname "$BTC_VERSION_FILE")"
-mkdir -p /tmp
 
-echo "Checking for latest Bitcoin Core..."
+echo "[build.sh] Ensuring Bitcoin Knots is installed via PPA..."
 
-LATEST_VERSION=$(curl -s https://bitcoincore.org/en/download/ | \
-    grep -Eo 'bitcoin-core-[0-9]+\.[0-9]+' | \
-    sed 's/bitcoin-core-//' | \
-    sort -V | tail -1)
+# Optionally upgrade to latest available version on each boot
+apt-get update -qq
+apt-get install --only-upgrade -y bitcoinknots-qt
 
-echo "Latest version is: $LATEST_VERSION"
+# Symlink system-installed binaries into /config/bin (if needed)
+QT_BIN=$(command -v bitcoin-qt)
+DAEMON_BIN=$(command -v bitcoind)
 
-CURRENT_VERSION=""
-[ -f "$BTC_VERSION_FILE" ] && CURRENT_VERSION=$(cat "$BTC_VERSION_FILE")
-
-if [[ "$CURRENT_VERSION" != "$LATEST_VERSION" ]]; then
-    echo "Updating to Bitcoin Core $LATEST_VERSION"
-    cd /tmp
-    FILE="bitcoin-${LATEST_VERSION}-x86_64-linux-gnu.tar.gz"
-    URL="https://bitcoincore.org/bin/bitcoin-core-${LATEST_VERSION}/${FILE}"
-
-    curl -LO "$URL"
-    tar -xf "$FILE"
-
-    cp -a "bitcoin-${LATEST_VERSION}/bin/"* "$BTC_BIN/"
-    chmod +x "$BTC_BIN/bitcoin-qt"
-
-    echo "$LATEST_VERSION" > "$BTC_VERSION_FILE"
-    echo "Update complete"
+if [[ -x "$QT_BIN" && -x "$DAEMON_BIN" ]]; then
+    ln -sf "$QT_BIN" "$BTC_BIN/bitcoin-qt"
+    ln -sf "$DAEMON_BIN" "$BTC_BIN/bitcoind"
 else
-    echo "Already running the latest version: $CURRENT_VERSION"
+    echo "[build.sh] ERROR: bitcoin-qt or bitcoind not found in PATH!"
+    exit 1
 fi
+
+# Record installed version
+VERSION=$("$QT_BIN" --version | head -n1 | awk '{print $3}')
+echo "$VERSION" > "$BTC_VERSION_FILE"
+
+echo "[build.sh] Bitcoin Knots version $VERSION ready."
