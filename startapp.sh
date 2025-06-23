@@ -6,6 +6,7 @@ export HOME=/config
 # Ensure app user owns config
 sudo chown -R nobody:users /config || true
 sudo chmod -R 777 /config || true
+mkdir -p /config/.bitcoin
 
 # Run update
 sudo /build.sh
