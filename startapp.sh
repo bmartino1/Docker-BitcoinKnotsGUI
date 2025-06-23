@@ -3,8 +3,8 @@ set -ex
 
 export HOME=/config
 
-# Check for update
+# Run build script to ensure latest version via PPA
 /build.sh
 
-# Launch bitcoin-qt from persistent path
-exec /config/bitcoin/bin/???
+# Launch bitcoin-qt from symlinked location in persistent config
+exec /config/bitcoin/bin/bitcoin-qt -datadir=/config/.bitcoin
