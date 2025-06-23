@@ -3,8 +3,12 @@ set -ex
 
 export HOME=/config
 
-# Run build script to ensure latest version via PPA
+# Ensure app user owns config
+chown -R app:users /config || true
+chmod -R u+rwX /config || true
+
+# Run update
 /build.sh
 
-# Launch bitcoin-qt from symlinked location in persistent config
+# Start Bitcoin Knots GUI
 exec /config/bitcoin/bin/bitcoin-qt -datadir=/config/.bitcoin
