@@ -59,7 +59,7 @@ COPY startapp.sh /startapp.sh
 RUN chmod +x /startapp.sh
 
 #Fix Bitcoin Permission for Build script ship with bitcon for those who don't use volumes.
-RUN mkdir /config
+RUN mkdir -p /config
 RUN chown nobody:users -R /config
 RUN chmod 777 -R /config
 
@@ -68,7 +68,6 @@ RUN chmod +x /build.sh
 RUN /build.sh
 
 #Fix Bitcoin Permission for Build script ship with bitcon for those who don't use volumes.
-RUN mkdir /config
 RUN chown nobody:users -R /config
 RUN chmod 777 -R /config
 
