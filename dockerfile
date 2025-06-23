@@ -41,7 +41,7 @@ RUN apt-get -yq update && apt-get -yq install \
     libqrencode-dev \
     libdb5.3++-dev \
     libdb5.3-dev \
-    unattended-upgrades apt-utils curl jq tar gnupg ca-certificates git xz-utils bash mc nano
+    unattended-upgrades apt-utils curl jq tar gnupg ca-certificates git xz-utils bash mc nano sudo
 
 # Install deps & add PPA for Bitcoin Knots
 RUN apt-get update && \
@@ -67,6 +67,10 @@ RUN chmod 777 -R /config
 COPY build.sh /build.sh
 RUN chmod +x /build.sh
 RUN /build.sh
+
+#give app user sudo powers
+RUN usermod -aG sudo app
+RUN usermod -aG sudo root
 
 #Info
 VOLUME /config
