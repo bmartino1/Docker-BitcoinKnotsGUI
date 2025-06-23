@@ -68,8 +68,8 @@ jlesage/docker-baseimage-gui:
 https://github.com/jlesage/docker-baseimage-gui
 
 bitcoin/bitcoin:
-https://github.com/willcl-ark/bitcoin-knots-docker
+https://github.com/willcl-ark/bitcoin-knots-docker   
 https://hub.docker.com/r/bitcoin/bitcoin
 
 bitcoinknots:
-https://github.com/bitcoinknots/bitcoin/tree/v28.1.knots20250305
+https://github.com/bitcoinknots/bitcoin
