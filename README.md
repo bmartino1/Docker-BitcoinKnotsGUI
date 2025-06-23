@@ -1,9 +1,12 @@
 # Docker-BitcoinKnotsGUI
-WIP Fork of Bitcoin core run Bitcoin Knots
-
-# Docker-BitcoinKnotsGUI
 Run Bitcoin Docker with VNC Gui
 
+You must make the .bitcoin folder and pathing beforehand...
+```bash
+mkdir -p /mnt/user/appdata/bitcoinknots/.bitcoin
+chmod 777 -R /mnt/user/appdata/bitcoinknots/
+chown nobody:users -R /mnt/user/appdata/bitcoinknots/
+```
 
 Otherwise make it yourself from this Repo:
 ```bash
@@ -17,9 +20,9 @@ docker run -d --name=bitcoin-knots-gui -p 5800:5800 -v /YourHostPath:/config bit
 ```
 Then go to your Docker IP:5800 to see the VNC web UI and watch your v27 Bitcoin wallet/node sync.
 
-# Docker - Bitcoin Core GUI Client
+# Docker - Bitcoin knots GUI Client
 
-Run the Bitcoin Core GUI wallet in a Docker container, accessible via a web browser and VNC. Built over the [jlesage/docker-baseimage-gui](https://github.com/jlesage/docker-baseimage-gui) image (Debian 12).
+Run the Bitcoin knots GUI wallet in a Docker container, accessible via a web browser and VNC. Built over the [jlesage/docker-baseimage-gui](https://github.com/jlesage/docker-baseimage-gui) image (Debian 12).
 
 ## Getting Started Docker run commands options
 
@@ -28,7 +31,7 @@ docker volume create --name=bitcoin-data
 docker run -d --name=bitcoin-knots-gui -p 5800:5800 -v bitcoin-data:/config bitcoin-knots-gui
 ```
 
-Open your browser and go to `localhost:5800`. You should see the Bitcoin Core GUI application running!
+Open your browser and go to `localhost:5800`. You should see the Bitcoin knots GUI application running!
 
 **On the first run, the Welcome window will open, where you will be prompted for the data location!
 You should set it to somewhere inside `/config`** (by default, it is set to `/config/.bitcoin`).
@@ -39,7 +42,7 @@ AT FIRST LAUNCH ALWAYS CHOOSE THE 2ND OPTION!!!
 ![image](https://github.com/user-attachments/assets/a20cc3ec-8af6-40a9-bb6a-cd9019157a87)
 
 
-The Bitcoin Core data directory is set to `/config/.bitcoin` by default. A volume is created for `/config`,
+The Bitcoin knots data directory is set to `/config/.bitcoin` by default. A volume is created for `/config`,
 but you might want to mount the `/config/.bitcoin` directory on another volume or bind mount.
 
 You can even mount subdirectories of the Bitcoin data directory. These are the most important:
@@ -65,7 +68,7 @@ jlesage/docker-baseimage-gui:
 https://github.com/jlesage/docker-baseimage-gui
 
 bitcoin/bitcoin:
-https://github.com/willcl-ark/bitcoin-core-docker
+https://github.com/willcl-ark/bitcoin-knots-docker
 https://hub.docker.com/r/bitcoin/bitcoin
 
 bitcoinknots:
