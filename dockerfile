@@ -53,7 +53,6 @@ RUN apt-get update && \
 RUN echo "unattended-upgrades unattended-upgrades/enable_auto_updates boolean true" | debconf-set-selections && \
     dpkg-reconfigure --frontend=noninteractive unattended-upgrades
 #https://wiki.debian.org/UnattendedUpgrades
-
 # Copy entrypoint and build script to auto grab lattest bitcoin...
 COPY startapp.sh /startapp.sh
 RUN chmod +x /startapp.sh
@@ -67,16 +66,23 @@ COPY build.sh /build.sh
 RUN chmod +x /build.sh
 RUN /build.sh
 
+# Add app user before calling the script
+RUN useradd -m -s /bin/bash app
+COPY sethomefolder.sh /sethomefolder.sh
+RUN chmod +x /sethomefolder.sh
+RUN /sethomefolder.sh
+
 #Fix Bitcoin Permission for Build script ship with bitcon for those who don't use volumes.
 RUN chown nobody:users -R /config
 RUN chmod 777 -R /config
 
-#app user run swithout sudo and is unable to...
+#app user runs without sudo and is unable to...
+RUN mkdir -p /etc/sudoers.d/
 RUN echo "app ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/nopasswd
 
 #Info
 VOLUME /config
 EXPOSE 5800
 
-# Entrypoint is auto done via scirpt for this base iamge docker DO NOT SPECIFY!
+# Entrypoint is aut done via scirpt for this debain docker DO NOT SPECIFY 
 #ENTRYPOINT ["/startapp.sh"]
