@@ -1,4 +1,5 @@
-FROM jlesage/baseimage-gui:debian-12-v4.7.1
+FROM jlesage/baseimage-gui:ubuntu-24.04
+#Useing Ubutnu for Ubuntu PPA Repository
 
 #English Locales
 RUN \
@@ -7,14 +8,14 @@ RUN \
     locale-gen
 ENV LANG=en_US.UTF-8
 
-# GUI env
+# GUI Base Image Default env
 ARG APP_ICON="https://bitcoin.org/img/icons/opengraph.png"
-RUN set-cont-env APP_NAME "Bitcoin-QT"
+RUN set-cont-env APP_NAME "Bitcoin Knots QT"
 RUN set-cont-env DISPLAY_WIDTH "1280"
 RUN set-cont-env DISPLAY_HEIGHT "800"
 RUN set-cont-env APP_VERSION "Latest"
 
-# Install necessary libraries for bitcoin-qt and bitcoind for script
+# Install Depends libraries for bitcoin-qt and bitcoind and bitcoin knots for base iamge and script
 RUN apt-get -yq update && apt-get -yq install \
     libfontconfig1 \
     libxcb1 \
@@ -42,9 +43,17 @@ RUN apt-get -yq update && apt-get -yq install \
     libdb5.3-dev \
     unattended-upgrades apt-utils curl jq tar gnupg ca-certificates git xz-utils bash mc nano
 
+# Install deps & add PPA for Bitcoin Knots
+RUN apt-get update && \
+    apt-get install -y software-properties-common curl gnupg jq bash xz-utils && \
+    add-apt-repository -y ppa:luke-jr/bitcoinknots && \
+    apt-get update && \
+    apt-get install -y bitcoinknots-qt
+
 # Configure unattended-upgrades for automatic secuiryt updates
 RUN echo "unattended-upgrades unattended-upgrades/enable_auto_updates boolean true" | debconf-set-selections && \
     dpkg-reconfigure --frontend=noninteractive unattended-upgrades
+#https://wiki.debian.org/UnattendedUpgrades
 
 # Copy entrypoint and build script to auto grab lattest bitcoin...
 COPY startapp.sh /startapp.sh
@@ -63,5 +72,5 @@ RUN /build.sh
 VOLUME /config
 EXPOSE 5800
 
-# Entrypoint is aut done via scirpt for this debain docker DO NOT SPECIFY 
+# Entrypoint is auto done via scirpt for this base iamge docker DO NOT SPECIFY!
 #ENTRYPOINT ["/startapp.sh"]
