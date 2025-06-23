@@ -1,0 +1,7 @@
+#https://medium.com/@Fiach_dubh/why-bitcoin-knots-instead-of-bitcoin-core-8ef60dcaf363
+#https://cointelegraph.com/news/bitcoin-knots-chain-split-kill-btc-price
+
+https://bitcoinknots.org/
+
+https://bitcoinknots.org/files/28.x/28.1.knots20250305/bitcoin-28.1.knots20250305-x86_64-linux-gnu.tar.gz
+Ubuntu PPA: https://launchpad.net/~luke-jr/+archive/ubuntu/bitcoinknots
