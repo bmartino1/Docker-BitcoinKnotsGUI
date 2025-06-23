@@ -1,3 +1,9 @@
+WIP
+
+While Functional Seting up adn fixing caevots to setup with public pool and or ckpool for solo mineing on unraid...
+https://docs.bitcoincashnode.org/doc/bitcoin-conf/
+https://medium.com/@ian_52650/setting-up-bitcoin-core-to-accept-remote-procedure-calls-rpc-from-an-external-host-c04c1c8b7652
+
 #https://medium.com/@Fiach_dubh/why-bitcoin-knots-instead-of-bitcoin-core-8ef60dcaf363
 #https://cointelegraph.com/news/bitcoin-knots-chain-split-kill-btc-price
 
