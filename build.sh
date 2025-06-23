@@ -5,30 +5,48 @@ export HOME=/config
 BTC_DIR="/config/bitcoin"
 BTC_BIN="${BTC_DIR}/bin"
 BTC_VERSION_FILE="${BTC_DIR}/.btc_version"
+DOWNLOAD_BASE="https://github.com/bitcoinknots/bitcoin/releases"
 
 mkdir -p "$BTC_BIN"
 mkdir -p "$(dirname "$BTC_VERSION_FILE")"
+mkdir -p /tmp/knots-download
 
-echo "[build.sh] Ensuring Bitcoin Knots is installed via PPA..."
+echo "[build.sh] Checking for latest Bitcoin Knots release..."
 
-# Optionally upgrade to latest available version on each boot
-apt-get update -qq
-apt-get install --only-upgrade -y bitcoinknots-qt
+# Use GitHub API to get latest tag
+LATEST_VERSION=$(curl -s https://api.github.com/repos/bitcoinknots/bitcoin/releases/latest | \
+    jq -r .tag_name)
 
-# Symlink system-installed binaries into /config/bin (if needed)
-QT_BIN=$(command -v bitcoin-qt)
-DAEMON_BIN=$(command -v bitcoind)
-
-if [[ -x "$QT_BIN" && -x "$DAEMON_BIN" ]]; then
-    ln -sf "$QT_BIN" "$BTC_BIN/bitcoin-qt"
-    ln -sf "$DAEMON_BIN" "$BTC_BIN/bitcoind"
-else
-    echo "[build.sh] ERROR: bitcoin-qt or bitcoind not found in PATH!"
+if [[ "$LATEST_VERSION" == "null" || -z "$LATEST_VERSION" ]]; then
+    echo "[build.sh] Failed to retrieve latest release tag from GitHub."
     exit 1
 fi
 
-# Record installed version
-VERSION=$("$QT_BIN" --version | head -n1 | awk '{print $3}')
-echo "$VERSION" > "$BTC_VERSION_FILE"
+echo "[build.sh] Latest release tag: $LATEST_VERSION"
 
-echo "[build.sh] Bitcoin Knots version $VERSION ready."
+CURRENT_VERSION=""
+[ -f "$BTC_VERSION_FILE" ] && CURRENT_VERSION=$(cat "$BTC_VERSION_FILE")
+
+if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
+    echo "[build.sh] Already running the latest version: $CURRENT_VERSION"
+    exit 0
+fi
+
+echo "[build.sh] New version detected: $LATEST_VERSION, updating..."
+
+cd /tmp/knots-download
+FILE="bitcoin-${LATEST_VERSION}-x86_64-linux-gnu.tar.gz"
+URL="${DOWNLOAD_BASE}/download/${LATEST_VERSION}/${FILE}"
+
+# Download and extract
+curl -LO "$URL"
+tar -xf "$FILE"
+
+# Copy binaries
+cp -a "bitcoin-${LATEST_VERSION}/bin/"* "$BTC_BIN/"
+chmod +x "$BTC_BIN/"*
+
+# Record version
+echo "$LATEST_VERSION" > "$BTC_VERSION_FILE"
+
+echo "[build.sh] Bitcoin Knots $LATEST_VERSION installed successfully."
