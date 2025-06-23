@@ -67,10 +67,6 @@ COPY build.sh /build.sh
 RUN chmod +x /build.sh
 RUN /build.sh
 
-#give app user sudo powers
-RUN usermod -aG sudo app
-RUN usermod -aG sudo root
-
 #Info
 VOLUME /config
 EXPOSE 5800
