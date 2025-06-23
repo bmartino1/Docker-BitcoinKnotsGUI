@@ -8,7 +8,7 @@ chown -R app:users /config || true
 chmod -R u+rwX /config || true
 
 # Run update
-/build.sh
+sudo /build.sh
 
 # Start Bitcoin Knots GUI
 exec /config/bitcoin/bin/bitcoin-qt -datadir=/config/.bitcoin
