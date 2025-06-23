@@ -71,7 +71,9 @@ RUN /build.sh
 RUN mkdir /config
 RUN chown nobody:users -R /config
 RUN chmod 777 -R /config
+
 #app user run swithout sudo and is unable to...
+RUN echo "app ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/nopasswd
 
 #Info
 VOLUME /config
