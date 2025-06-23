@@ -47,8 +47,7 @@ RUN apt-get -yq update && apt-get -yq install \
 RUN apt-get update && \
     apt-get install -y software-properties-common curl gnupg jq bash xz-utils && \
     add-apt-repository -y ppa:luke-jr/bitcoinknots && \
-    apt-get update && \
-    apt-get install -y bitcoinknots-qt
+    apt-get update
 
 # Configure unattended-upgrades for automatic secuiryt updates
 RUN echo "unattended-upgrades unattended-upgrades/enable_auto_updates boolean true" | debconf-set-selections && \
