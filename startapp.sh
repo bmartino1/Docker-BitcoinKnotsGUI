@@ -4,8 +4,8 @@ set -ex
 export HOME=/config
 
 # Ensure app user owns config
-chown -R app:users /config || true
-chmod -R u+rwX /config || true
+sudo chown -R nobody:users /config || true
+sudo chmod -R 777 /config || true
 
 # Run update
 sudo /build.sh
