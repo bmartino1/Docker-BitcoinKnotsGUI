@@ -1,4 +1,4 @@
-FROM jlesage/baseimage-gui:ubuntu-24.04
+FROM jlesage/baseimage-gui:ubuntu-24.04-v4.8.0
 #Useing Ubutnu for Ubuntu PPA Repository
 
 #English Locales
