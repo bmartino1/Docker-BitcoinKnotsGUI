@@ -1,5 +1,14 @@
 # Docker-BitcoinKnotsGUI
-Run Bitcoin Docker with VNC Gui
+Run Bitcoin Docker with VNC Gui. Fight Bitcoin Network Spam!
+
+Adational Unriad support: https://forums.unraid.net/topic/191428-suppot-bitcoin-gui
+
+Docker varable added to stay on curent version you downloaded or let build script run and update to lattest version.
+Bolean (T/F) AUTOUPDATE
+**First Run needs AUTOUPDATE True to create files in volume - /config...**
+
+It is best to make your own bitcoin.conf...
+Generator: https://bitcoin-knots-config-generator.netlify.app/
 
 You must make the .bitcoin folder and pathing beforehand...
 ```bash
