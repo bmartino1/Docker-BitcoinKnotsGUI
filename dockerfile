@@ -1,72 +1,119 @@
-# Bitmain IP Reporter (Wine + Web VNC)
-FROM jlesage/baseimage-gui:debian-12-v4.9.0
+FROM jlesage/baseimage-gui:ubuntu-24.04-v4.8.0
+#Useing Ubutnu for Ubuntu PPA Repository
 
-ENV APP_NAME="Bitmain IP Reporter" \
-    DISPLAY_WIDTH=1280 \
-    DISPLAY_HEIGHT=800 \
-    WINEARCH=win64 \
-    WINEPREFIX=/config/wineprefix \
-    WINEDLLOVERRIDES="mscoree,mshtml=" \
-    WINEDEBUG=-all \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8 \
-    ZIP_FILE="/zip/ip-reporter.zip"
+#English Locales
+RUN \
+    add-pkg locales && \
+    sed-patch 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG=en_US.UTF-8
 
-# prereqs and repo components
-RUN set -eux; \
-    apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        wget curl ca-certificates gnupg2 software-properties-common xz-utils; \
-    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
-        sed -i 's/components: *main$/components: main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/debian.sources; \
-    elif [ -f /etc/apt/sources.list ]; then \
-        sed -i 's/main$/main contrib non-free non-free-firmware/' /etc/apt/sources.list; \
-    else \
-        echo "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list; \
-        echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list; \
-        echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list; \
-    fi; \
+# GUI Base Image Default env
+ARG APP_ICON="https://bitcoin.org/img/icons/opengraph.png"
+RUN set-cont-env APP_NAME "Bitcoin Knots QT"
+RUN set-cont-env DISPLAY_WIDTH "1280"
+RUN set-cont-env DISPLAY_HEIGHT "800"
+RUN set-cont-env APP_VERSION "Latest"
+
+# Install Depends libraries for bitcoin-qt and bitcoind and bitcoin knots for base iamge and script
+RUN apt-get -yq update && apt-get -yq install \
+    libfontconfig1 \
+    libxcb1 \
+    libxrender1 \
+    libxcb-icccm4 \
+    libxkbcommon-x11-0 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    build-essential \
+    autoconf \
+    libssl-dev \
+    libboost-dev \
+    libboost-chrono-dev \
+    libboost-filesystem-dev \
+    libboost-program-options-dev \
+    libboost-system-dev \
+    libboost-test-dev \
+    libboost-thread-dev \
+    qtbase5-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libqrencode-dev \
+    libdb5.3++-dev \
+    libdb5.3-dev \
+    unattended-upgrades xdg-utils apt-utils curl jq tar gnupg ca-certificates git xz-utils bash mc nano vim sudo
+
+# Install deps & add PPA for Bitcoin Knots
+RUN apt-get update && \
+    apt-get install -y software-properties-common curl gnupg jq bash xz-utils && \
+    add-apt-repository -y ppa:luke-jr/bitcoinknots && \
     apt-get update
 
-# multi-arch then winehq repo
-RUN set -eux; \
-    dpkg --add-architecture i386; \
-    mkdir -pm755 /etc/apt/keyrings; \
-    wget -qO /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key; \
-    wget -qO /etc/apt/sources.list.d/winehq-bookworm.sources https://dl.winehq.org/wine-builds/debian/dists/bookworm/winehq-bookworm.sources; \
-    apt-get update
 
-# wine + libs (NOT winetricks via apt)
-RUN set -eux; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --install-recommends \
-        winehq-stable unzip cabextract xdg-utils locales \
-        libfontconfig1 libxcb1 libxrender1 libxcb-icccm4 libxkbcommon-x11-0 \
-        libxext6 libxfixes3 libxi6; \
-    apt-get clean; rm -rf /var/lib/apt/lists/*
+# Install mousepad and explicitly include its dependencies to open bitcoin.conf from within...
+RUN apt-get update && apt-get install -y \
+    mousepad \
+    aspell \
+    aspell-en \
+    dictionaries-common \
+    emacsen-common \
+    enchant-2 \
+    hunspell-en-us \
+    libaspell15 \
+    libenchant-2-2 \
+    libgspell-1-2 \
+    libgspell-1-common \
+    libgtksourceview-4-0 \
+    libgtksourceview-4-common \
+    libhunspell-1.7-0 \
+    libmousepad0 \
+    libtext-iconv-perl && \
+    # Set mousepad as default editor and visual editor
+    echo "export EDITOR=mousepad" >> /etc/profile && \
+    echo "export VISUAL=mousepad" >> /etc/profile
 
-# winetricks from Debian contrib .deb (bookworm)
-RUN set -eux; \
-    wget -O /tmp/winetricks.deb http://ftp.de.debian.org/debian/pool/contrib/w/winetricks/winetricks_20230212-2_all.deb; \
-    apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends /tmp/winetricks.deb; \
-    rm -f /tmp/winetricks.deb; \
-    apt-get clean; rm -rf /var/lib/apt/lists/*
+# Configure unattended-upgrades for automatic secuiryt updates
+RUN echo "unattended-upgrades unattended-upgrades/enable_auto_updates boolean true" | debconf-set-selections && \
+    dpkg-reconfigure --frontend=noninteractive unattended-upgrades
+#https://wiki.debian.org/UnattendedUpgrades
 
-# locale
-RUN set -eux; sed -i 's/# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen; locale-gen
+# Copy entrypoint and build script to auto grab lattest bitcoin...
+COPY startapp.sh /startapp.sh
+RUN chmod +x /startapp.sh
 
-# wine prefix init (non-interactive)
-RUN set -eux; mkdir -p /config /opt/app /zip; wineboot --init || true
+#Fix Bitcoin Permission for Build script ship with bitcon for those who don't use volumes.
+RUN mkdir -p /config
+RUN chown nobody:users -R /config
+RUN chmod 777 -R /config
 
-# jlesage UI env
-RUN set-cont-env APP_NAME "${APP_NAME}" && \
-    set-cont-env DISPLAY_WIDTH "${DISPLAY_WIDTH}" && \
-    set-cont-env DISPLAY_HEIGHT "${DISPLAY_HEIGHT}"
+COPY build.sh /build.sh
+RUN chmod +x /build.sh
+RUN /build.sh
 
-VOLUME ["/config", "/zip"]
-EXPOSE 5800 5900
+# Add app user before calling the script
+RUN useradd -m -s /bin/bash app
+COPY sethomefolder.sh /sethomefolder.sh
+RUN chmod +x /sethomefolder.sh
+RUN /sethomefolder.sh
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+#Fix Bitcoin Permission for Build script ship with bitcon for those who don't use volumes.
+RUN chown nobody:users -R /config
+RUN chmod 777 -R /config
+
+#app user runs without sudo and is unable to...
+RUN mkdir -p /etc/sudoers.d/
+RUN echo "app ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/nopasswd
+
+RUN apt-get update && apt-get upgrade -y
+
+# Final cleanup to reduce image size
+RUN apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#Info
+VOLUME /config
+EXPOSE 5800
+
+# Entrypoint is aut done via scirpt for this debain docker DO NOT SPECIFY 
+#ENTRYPOINT ["/startapp.sh"]
